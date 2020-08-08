@@ -1,10 +1,10 @@
 """Kahoot simulation program to determine the most important quality.
    Response time: The rate of answering questions
-   Streak: The ability to maintain streaks
    Accuracy: The overall number of correct answers
 
    Questions
-   Why streaks made the game terrible...now removed
+   Streaks removed
+
    Gap between speed and accuracy
    What happens if your slower
 
@@ -41,43 +41,45 @@ def calculate_score(response_time, question_timer, points_possible):
     return score
 
 
-def calculate_bonus(streak, points_possible):
-    bonus = 0
-    if points_possible == 0:
-        return bonus
+def calculate_average_response_time(times_list, answers_list):
+    averages = []
+    for x in range(len(answers_list)):
+        if answers_list[x] == 1:
+            averages.append(times_list[x])
+    if len(averages) == 0:
+        return 0
     else:
-        if streak > 5:
-            bonus = 500
-        elif streak == 0:
-            bonus = 0
-        else:
-            bonus = (streak - 1) * 100
-    return bonus
+        return round(sum(averages) / len(averages), 1)
 
 
-def calculate_average_response_time(times_list):
-    return round(sum(times_list) / len(times_list), 1)
-
-
-def calculate_total_bonus(bonus_list):
-    return sum(bonus_list)
+def calculate_total_response_time(time_list):
+    return round(sum(time_list), 1)
 
 
 def calculate_total_answers(answer_list):
     return sum(answer_list)
 
 
+# number of questions
+def calculate_accuracy(answer_list, questions):
+    correct = 0
+    for x in range(len(answer_list)):
+        if answer_list[x] == 1:
+            correct += 1
+    return correct / questions
+
+
 def get_points(sort_player):
     return sort_player.points
+
 
 # List of answers
 # calculate answer
 # check against the list
 
-
 if __name__ == "__main__":
     #  questions question_timer points_possible players
-    game = Game.Game(5, 30, 1000, 2)
+    game = Game.Game(30, 30, 1000, 10000)
     # Loop players
     for player_index in range(len(game.player_list)):
         # Get the player for player list
@@ -93,42 +95,38 @@ if __name__ == "__main__":
             # Log answer
             player.answers.append(answer)
             # If correct calculate score, bonus, points and increment streak
-
             if answer == 1:
                 # Handle first question, streak is not set
-                if question_index == 0:
-                    player.streak = 0
-                else:
-                    player.streak = player.streaks[-1] + 1
-                player.streaks.append(player.streak)
                 player_score = calculate_score(player_response_time, game.question_timer, game.points_possible)
                 player.scores.append(player_score)
-                player_bonus = calculate_bonus(player.streak, game.points_possible)
-                player.bonuses.append(player_bonus)
-                player.points += player_score + player_bonus
+                player.points += player_score
             # Else incorrect score, bonus, streak 0 maintain points
             else:
-                # Reset player streak
-                player.streak = 0
-                player.streaks.append(player.streak)
                 player_score = 0
                 player.scores.append(player_score)
-                player_bonus = 0
-                player.bonuses.append(player_bonus)
-                player.points += player_score + player_bonus
-
-    # Sort player list
-    # game.player_list.sort(key=get_points, reverse=True)
-
+                player.points += player_score
 
     # Generate dataset
-    # with open('kahoot_small.csv', 'a', newline='') as file:
-    #     writer = csv.writer(file)
-    #     writer.writerow(["Points", "Bonuses", "Accuracy", "Speed"])
-    #     for index in range(len(game.player_list)):
-    #         print(index)
-    #         player = game.player_list[index]
-    #         writer.writerow([player.points,
-    #                          calculate_total_bonus(player.bonuses),
-    #                          calculate_total_answers(player.answers),
-    #                          calculate_average_response_time(player.response_times)])
+    with open('new_kahoot_data.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Points", "Accuracy", "Total Response Time"])
+        for index in range(len(game.player_list)):
+            print(index)
+            player = game.player_list[index]
+            writer.writerow([player.points,
+                             calculate_accuracy(player.answers, game.questions),
+                             calculate_total_response_time(player.response_times)])
+
+    # Generate question dataset
+    with open('kahoot_score_time_data.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Score", "Response Time"])
+        for index in range(len(game.player_list)):
+            print(index)
+            player = game.player_list[index]
+            for check in range(len(player.scores)):
+                # Check correct answers
+                if player.scores[check] == 0:
+                    continue
+                else:
+                    writer.writerow([player.scores[check], player.response_times[check]])
