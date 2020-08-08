@@ -6,12 +6,13 @@
    Questions
    Why streaks made the game terrible...now removed
    Gap between speed and accuracy
+   What happens if your slower
 
     Assumptions
     0. All questions have same time
     1. Player answers all questions
    """
-
+import csv
 import random
 from models import Game
 
@@ -54,9 +55,25 @@ def calculate_bonus(streak, points_possible):
     return bonus
 
 
+def calculate_average_response_time(times_list):
+    return round(sum(times_list) / len(times_list), 1)
+
+
+def calculate_total_bonus(bonus_list):
+    return sum(bonus_list)
+
+
+def calculate_total_answers(answer_list):
+    return sum(answer_list)
+
+
+def get_points(sort_player):
+    return sort_player.points
+
+
 if __name__ == "__main__":
     #  questions question_timer points_possible players
-    game = Game.Game(10, 30, 1000, 2)
+    game = Game.Game(30, 30, 1000, 1000000)
     # Loop players
     for player_index in range(len(game.player_list)):
         # Get the player for player list
@@ -95,17 +112,17 @@ if __name__ == "__main__":
                 player.bonuses.append(player_bonus)
                 player.points += player_score + player_bonus
 
-    for index in range(len(game.player_list)):
-        player = game.player_list[index]
-        print("Player " + str(index) + " Points " + str(player.points))
-        print("Scores")
-        print(player.scores)
-        print("Bonuses")
-        print(player.bonuses)
-        print("Streaks")
-        print(player.streaks)
-        print("Answers")
-        print(player.answers)
-        print("Response Times")
-        print(player.response_times)
-        print()
+    # Sort player list
+    # game.player_list.sort(key=get_points, reverse=True)
+
+    # Generate dataset
+    with open('kahoot.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Points", "Bonuses", "Accuracy", "Speed"])
+        for index in range(len(game.player_list)):
+            print(index)
+            player = game.player_list[index]
+            writer.writerow([player.points,
+                             calculate_total_bonus(player.bonuses),
+                             calculate_total_answers(player.answers),
+                             calculate_average_response_time(player.response_times)])
