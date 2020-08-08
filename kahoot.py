@@ -70,10 +70,14 @@ def calculate_total_answers(answer_list):
 def get_points(sort_player):
     return sort_player.points
 
+# List of answers
+# calculate answer
+# check against the list
+
 
 if __name__ == "__main__":
     #  questions question_timer points_possible players
-    game = Game.Game(30, 30, 1000, 1000000)
+    game = Game.Game(5, 30, 1000, 2)
     # Loop players
     for player_index in range(len(game.player_list)):
         # Get the player for player list
@@ -89,6 +93,7 @@ if __name__ == "__main__":
             # Log answer
             player.answers.append(answer)
             # If correct calculate score, bonus, points and increment streak
+
             if answer == 1:
                 # Handle first question, streak is not set
                 if question_index == 0:
@@ -115,14 +120,15 @@ if __name__ == "__main__":
     # Sort player list
     # game.player_list.sort(key=get_points, reverse=True)
 
+
     # Generate dataset
-    with open('kahoot.csv', 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["Points", "Bonuses", "Accuracy", "Speed"])
-        for index in range(len(game.player_list)):
-            print(index)
-            player = game.player_list[index]
-            writer.writerow([player.points,
-                             calculate_total_bonus(player.bonuses),
-                             calculate_total_answers(player.answers),
-                             calculate_average_response_time(player.response_times)])
+    # with open('kahoot_small.csv', 'a', newline='') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow(["Points", "Bonuses", "Accuracy", "Speed"])
+    #     for index in range(len(game.player_list)):
+    #         print(index)
+    #         player = game.player_list[index]
+    #         writer.writerow([player.points,
+    #                          calculate_total_bonus(player.bonuses),
+    #                          calculate_total_answers(player.answers),
+    #                          calculate_average_response_time(player.response_times)])
